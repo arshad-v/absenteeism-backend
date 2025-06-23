@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environments
+.env
+.venv
+venv/
+env/
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp
+
+# Generated files
+static/img/
+
+# Frontend directory (managed in its own repository)
+frontend/
+
+# OS-specific
+.DS_Store
+Thumbs.db

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EDA Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Exploratory Data Analysis</h1>
+    <div class="eda-grid">
+      <div class="eda-image">
+        <h2>Age Distribution</h2>
+        <img src="{{ url_for('static', filename='images/age_distribution.png') }}" alt="Age Distribution">
+      </div>
+      <div class="eda-image">
+        <h2>AbsentHours by Department</h2>
+        <img src="{{ url_for('static', filename='images/absenthours_by_dept.png') }}" alt="AbsentHours by Department">
+      </div>
+      <div class="eda-image">
+        <h2>Correlation Heatmap</h2>
+        <img src="{{ url_for('static', filename='images/correlation_heatmap.png') }}" alt="Correlation Heatmap">
+      </div>
+    </div>
+    <a href="/" class="back-link">← Back to Prediction Page</a>
+  </div>
+</body>
+</html>

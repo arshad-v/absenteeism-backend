@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Absenteeism Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Predict Employee Absenteeism</h1>
+        <form id="predictForm">
+            <label>Gender: <input type="text" name="Gender" placeholder="e.g., Male" required /></label>
+            <label>City: <input type="text" name="City" placeholder="e.g., Seattle" required /></label>
+            <label>Job Title: <input type="text" name="JobTitle" placeholder="e.g., Cashier" required /></label>
+            <label>Department: <input type="text" name="DepartmentName" placeholder="e.g., Dairy" required /></label>
+            <label>Store Location: <input type="text" name="StoreLocation" placeholder="e.g., Seattle" required /></label>
+            <label>Business Unit: <input type="text" name="BusinessUnit" placeholder="e.g., Stores" required /></label>
+            <label>Division: <input type="text" name="Division" placeholder="e.g., NWC" required /></label>
+            <label>Age: <input type="number" name="Age" placeholder="e.g., 30" required /></label>
+            <label>Length of Service: <input type="number" name="LengthService" placeholder="e.g., 5" required /></label>
+            <button type="submit">Predict Absenteeism</button>
+        </form>
+        <div id="result"></div>
+        <div class="back-link-container">
+          <a href="/eda" class="back-link">🔍 View EDA Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.Age = parseInt(data.Age);
+            data.LengthService = parseInt(data.LengthService);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Predicting...</p>';
+
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const json = await res.json();
+                resultDiv.innerHTML = `
+                    <h2>Prediction Result</h2>
+                    <p><strong>Predicted Absent Hours:</strong> ${json.predicted_hours.toFixed(2)} hours</p>
+                    <p><strong>Cluster:</strong> ${json.cluster_name}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error-message">An error occurred: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

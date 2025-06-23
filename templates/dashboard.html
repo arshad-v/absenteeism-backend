@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Absenteeism Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Absenteeism Analytics Suite</h1>
+        <!-- Prediction Section -->
+        <section>
+            <h2>Predict Absenteeism</h2>
+            <form id="predictForm">
+                <label>Gender: <input type="text" name="Gender" placeholder="e.g., Male" required /></label>
+                <label>City: <input type="text" name="City" placeholder="e.g., Seattle" required /></label>
+                <label>Job Title: <input type="text" name="JobTitle" placeholder="e.g., Cashier" required /></label>
+                <label>Department: <input type="text" name="DepartmentName" placeholder="e.g., Dairy" required /></label>
+                <label>Store Location: <input type="text" name="StoreLocation" placeholder="e.g., Seattle" required /></label>
+                <label>Business Unit: <input type="text" name="BusinessUnit" placeholder="e.g., Stores" required /></label>
+                <label>Division: <input type="text" name="Division" placeholder="e.g., NWC" required /></label>
+                <label>Age: <input type="number" name="Age" placeholder="e.g., 30" required /></label>
+                <label>Length of Service: <input type="number" name="LengthService" placeholder="e.g., 5" required /></label>
+                <button type="submit">Predict Absenteeism</button>
+            </form>
+            <div id="result"></div>
+        </section>
+
+        <!-- EDA Section -->
+        <section>
+            <h2>Analytics Dashboard</h2>
+            <div class="eda-grid">
+                <div class="eda-image">
+                    <h3>Age Distribution</h3>
+                    <img src="{{ url_for('static', filename='images/age_distribution.png') }}" alt="Age Distribution" />
+                </div>
+                <div class="eda-image">
+                    <h3>Correlation Heatmap</h3>
+                    <img src="{{ url_for('static', filename='images/correlation_heatmap.png') }}" alt="Correlation Heatmap" />
+                </div>
+                <div class="eda-image">
+                    <h3>Cluster Distribution</h3>
+                    <img src="{{ url_for('static', filename='images/cluster_distribution.png') }}" alt="Cluster Distribution" />
+                </div>
+                <div class="eda-image">
+                    <h3>Age vs AbsentHours Scatter</h3>
+                    <img src="{{ url_for('static', filename='images/cluster_scatter.png') }}" alt="Cluster Scatter" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Cluster Groups Section -->
+        <section>
+            <h2>Cluster Groups</h2>
+            <div class="cluster-grid">
+                <div class="cluster-card" id="cluster-0">
+                    <h3>Low Risk Employees</h3>
+                    <p>Employees with consistent attendance records and low predicted absenteeism hours.</p>
+                </div>
+                <div class="cluster-card" id="cluster-1">
+                    <h3>Moderate Risk Employees</h3>
+                    <p>Employees with some fluctuation in attendance; monitor and provide support as needed.</p>
+                </div>
+                <div class="cluster-card" id="cluster-2">
+                    <h3>High Risk Employees</h3>
+                    <p>Employees with higher probability of absenteeism; consider proactive engagement strategies.</p>
+                </div>
+                <div class="cluster-card" id="cluster-3">
+                    <h3>Very High Risk Employees</h3>
+                    <p>Employees with significant absenteeism risk; immediate intervention recommended.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.Age = parseInt(data.Age);
+            data.LengthService = parseInt(data.LengthService);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Predicting...</p>';
+
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const json = await res.json();
+                resultDiv.innerHTML = `
+                    <h3>Prediction Result</h3>
+                    <p><strong>Predicted Absent Hours:</strong> ${json.predicted_hours.toFixed(2)} hours</p>
+                    <p><strong>Cluster:</strong> ${json.cluster_name}</p>
+                `;
+                // Highlight corresponding cluster card
+                document.querySelectorAll('.cluster-card').forEach(card => card.classList.remove('active'));
+                const active = document.getElementById(`cluster-${json.cluster_id}`);
+                if (active) {
+                    active.classList.add('active');
+                    
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error-message">An error occurred: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
